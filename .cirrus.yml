@@ -15,7 +15,6 @@ task:
       memory: 32G
 
   Build-Env-Setup_background_script:
-       - export DEBIAN_FRONTEND=noninteractive
        - mkdir -p ~/.config/rclone
        - echo "$rcloneconfig_b64" | base64 -d > ~/.config/rclone/rclone.conf
        - git config --global user.name "paiskomom"
@@ -23,10 +22,9 @@ task:
        - echo "$credentials" > ~/.git-credentials
        - git config --global credential.helper store --file=~/.git-credentials
        - mkdir -p ~/ccache
-       - rclone copy komom:komom/ccache.tar.gz ~/ -P
+       - rclone copy komom:komom/ccache.tar.gz ~/ -P || true
        - cd ~/
-       - time tar xf ccache.tar.gz
-       - cd ~/
+       - time tar xf ccache.tar.gz || true
 
   Storage-Checker_background_script:
       - df -h
@@ -38,14 +36,12 @@ task:
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="🔄 Start sync Source. . ."
       - mkdir -p ~/rom
       - cd ~/rom
-      - sudo curl --create-dirs -L -o /usr/local/bin/repoo -O -L https://storage.googleapis.com/git-repo-downloads/repo
-      - sudo chmod a+rx /usr/local/bin/repoo
       - repo init -q --no-repo-verify --depth=1 -u https://github.com/ResurrectionRemix/platform_manifest.git -b Q
       - git clone --depth 1 https://github.com/paiskomom/local_manifest.git -b rr .repo/local_manifests
-      - sudo apt-get update && sudo apt-get install -y git-lfs && git lfs install
+      - git lfs install 2>/dev/null || true
       - rm -rf .repo/repo && git clone https://gerrit.googlesource.com/git-repo .repo/repo
       - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j8
-      - repo forall -c 'git lfs install && git lfs pull && git lfs checkout'
+      - repo forall -c 'git lfs pull 2>/dev/null && git lfs checkout 2>/dev/null || true'
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ Sync Completed!"
 
   Build_script:
@@ -53,15 +49,21 @@ task:
       - export BUILD_USER="hunk"
       - export BUILD_HOST="hunk-CI"
       - export BUILD_HOSTNAME="hunk-CI"
-      - sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="🛠️ Build Started! https://cirrus-ci.com/build/$CIRRUS_BUILD_ID"
-      - ./collect.sh
+      
+      - echo "=== Mengecek isi collect.sh ==="
+      - cat $CIRRUS_WORKING_DIR/collect.sh
+      - echo "=== Mengecek isi folder rom ==="
+      - ls -la ~/rom/
+
+      - cd ~/rom && bash $CIRRUS_WORKING_DIR/collect.sh
+      
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ Build $(cd ~/rom/out/target/product/whyred/ && ls RROS*.zip) Completed!"
 
   Upload_script:
-      - ./upload.sh
+      - bash $CIRRUS_WORKING_DIR/upload.sh
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="📮 Compressing ccache...."
-      - ./ziping.sh
+      - bash $CIRRUS_WORKING_DIR/ziping.sh
       - cd ~/
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="📤 Uploading ccache...."
       - rclone copy ccache.tar.gz komom:komom -P
