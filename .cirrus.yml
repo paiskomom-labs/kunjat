@@ -8,7 +8,7 @@ env:
 
 task:
   name: "Setting Up, Syncing, Building and Uploading..."
-  timeout_in: 480m
+  timeout_in: 115m
   container:
       image: memedo/paiskomom:knjt
       cpu: 8
@@ -54,13 +54,12 @@ task:
       - export BUILD_HOSTNAME="komom"
       - export BUILD_HOST="komom"
       - sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-      - sudo ln -s /proc/mounts /etc/mtab
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="🛠️ Boeild komom Started! https://cirrus-ci.com/build/$CIRRUS_BUILD_ID"
       - ./collect.sh
-      - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ Boeild $(cd ~/rom/out/target/product/whyred/ && ls RROS*.zip) Completed!"
+      - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="⏳ Build script selesai. Lanjut ke proses upload ccache atau zip ROM."
 
   Upload_script:
-      - ./upload.sh
+      - if ls ~/rom/out/target/product/whyred/RROS*.zip 1> /dev/null 2>&1; then ./upload.sh; curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ Boeild Completed & Uploaded!"; else echo "Zip belum terbentuk, lanjut upload ccache..."; fi
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="📮 Compressing ccache...."
       - ./ziping.sh
       - cd ~/
