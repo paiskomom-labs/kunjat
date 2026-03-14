@@ -3,8 +3,8 @@ env:
     rcloneconfig_b64: "ENCRYPTED[59e7f7c9304e81fd6e8435026afc30881d8d823ea361f1ec5e3b0fb0a142d2780eae2089413c6ac35253505c92705c01]"
     tokentl: "ENCRYPTED[1d093ac4c2a9b51d77323ab714a27bfa6cd62f49101e702287ea9c6a49f5b14e056ad28ff8ef9da9eb907420b40da245]"
     idtl: "ENCRYPTED[55f64c7f5099cd93f442d6f93dd9f8a34bf29961c0bec5be10580ece33bfe81faf74502094ef81c04c6c6439fa73c99b]"
-    lunch: lunch rr_whyred-user
-    make: mka bacon
+    lunch: lunch conquer_whyred-user
+    make: mka carthage
 
 task:
   name: "Setting Up, Syncing, Building and Uploading..."
@@ -23,7 +23,7 @@ task:
        - echo "$credentials" > ~/.git-credentials
        - git config --global credential.helper store --file=~/.git-credentials
        - mkdir -p ~/ccache
-       - rclone copy komom:komom/ccache.tar.gz ~/ -P
+       - rclone copy komom:conquer/ccache.tar.gz ~/ -P
        - cd ~/
        - time tar xf ccache.tar.gz
        - cd ~/
@@ -40,8 +40,8 @@ task:
       - cd ~/rom
       - sudo curl --create-dirs -L -o /usr/local/bin/repoo -O -L https://storage.googleapis.com/git-repo-downloads/repo
       - sudo chmod a+rx /usr/local/bin/repoo
-      - repo init -q --no-repo-verify --depth=1 -u https://github.com/paiskomom/platform_manifest -b Q
-      - git clone --depth 1 https://github.com/paiskomom/local_manifest.git -b rr .repo/local_manifests
+      - repo init -q --no-repo-verify --depth=1 -u https://github.com/conquerOS-CLO/manifest -b eleven
+      - git clone --depth 1 https://github.com/paiskomom/local_manifest.git -b conquer-11 .repo/local_manifests
       - sudo apt-get update && sudo apt-get install -y git-lfs && git lfs install
       - rm -rf .repo/repo && git clone https://gerrit.googlesource.com/git-repo .repo/repo
       - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j8
@@ -54,7 +54,7 @@ task:
       - export BUILD_HOSTNAME="ubuntu"
       - export BUILD_HOST="ubuntu"
       - sudo ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-      - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="🛠️ Boeild komom Started! https://cirrus-ci.com/build/$CIRRUS_BUILD_ID"
+      - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="🛠️ Boeild conquer Started! https://cirrus-ci.com/build/$CIRRUS_BUILD_ID"
       - ./collect.sh
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="⏳ Build script selesai. Lanjut ke proses upload ccache atau zip ROM."
 
@@ -64,5 +64,5 @@ task:
       - ./ziping.sh
       - cd ~/
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="📤 Uploading ccache...."
-      - rclone copy ccache.tar.gz komom:komom -P
+      - rclone copy ccache.tar.gz komom:conquer -P
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ ccache Uploaded Successfully!"
