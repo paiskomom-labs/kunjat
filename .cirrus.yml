@@ -4,7 +4,7 @@ env:
     tokentl: "ENCRYPTED[1d093ac4c2a9b51d77323ab714a27bfa6cd62f49101e702287ea9c6a49f5b14e056ad28ff8ef9da9eb907420b40da245]"
     idtl: "ENCRYPTED[55f64c7f5099cd93f442d6f93dd9f8a34bf29961c0bec5be10580ece33bfe81faf74502094ef81c04c6c6439fa73c99b]"
     lunch: lunch conquer_whyred-user
-    make: mka carthage
+    make: make carthage
 
 task:
   name: "Setting Up, Syncing, Building and Uploading..."
@@ -47,6 +47,7 @@ task:
       - repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune --force-sync -j8
       - repo forall -c 'git lfs install && git lfs pull && git lfs checkout'
       - curl -s https://api.telegram.org/bot$tokentl/sendMessage -d chat_id=$idtl -d text="✅ Sync Completed!"
+      - rm -rf vendor/conquer/build/tools/roomservice.py
 
   Build_script:
       - export BUILD_USERNAME="haikaru17"
